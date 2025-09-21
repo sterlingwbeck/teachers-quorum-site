@@ -1,9 +1,9 @@
-import { auth, db, rtdb } from './index.html'; // Globals from your Firebase init
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { ref, set, push, onValue, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+// Use Firebase objects from window (set in index.html)
+const auth = window.auth;
+const db = window.db;
+const rtdb = window.rtdb;
 
-// --------- Signup ---------
+// ---------- Signup ----------
 window.signup = async function() {
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
@@ -12,18 +12,18 @@ window.signup = async function() {
   if (!name || !email || !password) return alert("Fill all fields");
 
   try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', userCred.user.uid), {name, email});
+    const userCred = await firebase.auth.createUserWithEmailAndPassword(auth, email, password);
+    await firebase.firestore.setDoc(firebase.firestore.doc(db, 'users', userCred.user.uid), { name, email });
     alert("Account created! You can now log in.");
     document.getElementById('name').value = '';
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
-  } catch(err) {
+  } catch (err) {
     alert(err.message);
   }
 }
 
-// --------- Login ---------
+// ---------- Login ----------
 window.login = async function() {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
@@ -31,33 +31,33 @@ window.login = async function() {
   if (!email || !password) return alert("Enter email and password");
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await firebase.auth.signInWithEmailAndPassword(auth, email, password);
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('app-section').style.display = 'block';
     loadSchedule();
     loadChat();
     loadUserInfo();
     setOnlineStatus(true);
-  } catch(err) {
+  } catch (err) {
     alert(err.message);
   }
 }
 
-// --------- Logout ---------
+// ---------- Logout ----------
 window.logout = function() {
   setOnlineStatus(false);
-  signOut(auth);
+  firebase.auth.signOut(auth);
   document.getElementById('app-section').style.display = 'none';
   document.getElementById('login-section').style.display = 'block';
 }
 
-// --------- Tab switching ---------
+// ---------- Tab Switching ----------
 window.showTab = function(tabId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.style.display='none');
   document.getElementById(tabId).style.display='block';
 }
 
-// --------- Load Schedule from Google Sheets ---------
+// ---------- Load Schedule ----------
 async function loadSchedule() {
   const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVXc593WLsr5rbR6FTA8Gn8P5gAxSgdqizcq3EOCv2YPhai7MnCtMw8HWyl7i_PAYMRaHvgbKtGAf4/pub?output=csv';
   try {
@@ -80,10 +80,10 @@ async function loadSchedule() {
   }
 }
 
-// --------- Chat functionality ---------
+// ---------- Chat ----------
 function loadChat() {
   const chatBox = document.getElementById('chat-box');
-  onValue(ref(rtdb, 'chat'), snapshot => {
+  firebase.database.onValue(firebase.database.ref(rtdb, 'chat'), snapshot => {
     chatBox.innerHTML = '';
     const messages = snapshot.val() || {};
     Object.values(messages).forEach(msg => {
@@ -98,20 +98,20 @@ function loadChat() {
 window.sendMessage = function() {
   const input = document.getElementById('chat-input');
   if(!input.value || !auth.currentUser) return;
-  push(ref(rtdb, 'chat'), {user: auth.currentUser.email, text: input.value});
+  firebase.database.push(firebase.database.ref(rtdb, 'chat'), { user: auth.currentUser.email, text: input.value });
   input.value = '';
 }
 
-// --------- User Info and Online Users ---------
+// ---------- User Info & Online ----------
 async function loadUserInfo() {
   const user = auth.currentUser;
-  const docSnap = await getDoc(doc(db, 'users', user.uid));
-  if(docSnap.exists()) {
+  const docSnap = await firebase.firestore.getDoc(firebase.firestore.doc(db, 'users', user.uid));
+  if(docSnap.exists) {
     document.getElementById('user-info').textContent = `Name: ${docSnap.data().name}, Email: ${docSnap.data().email}`;
   }
 
   const onlineUsersEl = document.getElementById('online-users');
-  onValue(ref(rtdb, 'online'), snapshot => {
+  firebase.database.onValue(firebase.database.ref(rtdb, 'online'), snapshot => {
     onlineUsersEl.innerHTML = '';
     const users = snapshot.val() || {};
     Object.values(users).forEach(u => {
@@ -122,21 +122,21 @@ async function loadUserInfo() {
   });
 }
 
-// --------- Online Status Tracking ---------
+// ---------- Online Status ----------
 function setOnlineStatus(isOnline) {
   const user = auth.currentUser;
   if(!user) return;
-  const userRef = ref(rtdb, 'online/' + user.uid);
+  const userRef = firebase.database.ref(rtdb, 'online/' + user.uid);
   if(isOnline) {
-    set(userRef, user.email);
-    onDisconnect(userRef).remove();
+    firebase.database.set(userRef, user.email);
+    firebase.database.onDisconnect(userRef).remove();
   } else {
-    remove(userRef);
+    firebase.database.remove(userRef);
   }
 }
 
-// --------- Automatically track auth state ---------
-onAuthStateChanged(auth, user => {
+// ---------- Track Auth State ----------
+firebase.auth.onAuthStateChanged(auth, user => {
   if(user) {
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('app-section').style.display = 'block';
