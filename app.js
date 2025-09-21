@@ -1,4 +1,4 @@
-// Use Firebase objects from window (set in index.html)
+// Use global Firebase objects
 const auth = window.auth;
 const db = window.db;
 const rtdb = window.rtdb;
@@ -12,8 +12,8 @@ window.signup = async function() {
   if (!name || !email || !password) return alert("Fill all fields");
 
   try {
-    const userCred = await firebase.auth.createUserWithEmailAndPassword(auth, email, password);
-    await firebase.firestore.setDoc(firebase.firestore.doc(db, 'users', userCred.user.uid), { name, email });
+    const userCred = await firebase.auth().createUserWithEmailAndPassword(auth, email, password);
+    await firebase.firestore().doc(db, 'users', userCred.user.uid).set({ name, email });
     alert("Account created! You can now log in.");
     document.getElementById('name').value = '';
     document.getElementById('email').value = '';
@@ -25,13 +25,13 @@ window.signup = async function() {
 
 // ---------- Login ----------
 window.login = async function() {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
 
   if (!email || !password) return alert("Enter email and password");
 
   try {
-    await firebase.auth.signInWithEmailAndPassword(auth, email, password);
+    await firebase.auth().signInWithEmailAndPassword(auth, email, password);
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('app-section').style.display = 'block';
     loadSchedule();
@@ -46,7 +46,7 @@ window.login = async function() {
 // ---------- Logout ----------
 window.logout = function() {
   setOnlineStatus(false);
-  firebase.auth.signOut(auth);
+  firebase.auth().signOut(auth);
   document.getElementById('app-section').style.display = 'none';
   document.getElementById('login-section').style.display = 'block';
 }
@@ -83,7 +83,7 @@ async function loadSchedule() {
 // ---------- Chat ----------
 function loadChat() {
   const chatBox = document.getElementById('chat-box');
-  firebase.database.onValue(firebase.database.ref(rtdb, 'chat'), snapshot => {
+  firebase.database().ref(rtdb, 'chat').on('value', snapshot => {
     chatBox.innerHTML = '';
     const messages = snapshot.val() || {};
     Object.values(messages).forEach(msg => {
@@ -98,20 +98,20 @@ function loadChat() {
 window.sendMessage = function() {
   const input = document.getElementById('chat-input');
   if(!input.value || !auth.currentUser) return;
-  firebase.database.push(firebase.database.ref(rtdb, 'chat'), { user: auth.currentUser.email, text: input.value });
+  firebase.database().ref(rtdb, 'chat').push({ user: auth.currentUser.email, text: input.value });
   input.value = '';
 }
 
 // ---------- User Info & Online ----------
 async function loadUserInfo() {
   const user = auth.currentUser;
-  const docSnap = await firebase.firestore.getDoc(firebase.firestore.doc(db, 'users', user.uid));
+  const docSnap = await firebase.firestore().doc(db, 'users', user.uid).get();
   if(docSnap.exists) {
     document.getElementById('user-info').textContent = `Name: ${docSnap.data().name}, Email: ${docSnap.data().email}`;
   }
 
   const onlineUsersEl = document.getElementById('online-users');
-  firebase.database.onValue(firebase.database.ref(rtdb, 'online'), snapshot => {
+  firebase.database().ref(rtdb, 'online').on('value', snapshot => {
     onlineUsersEl.innerHTML = '';
     const users = snapshot.val() || {};
     Object.values(users).forEach(u => {
@@ -126,17 +126,17 @@ async function loadUserInfo() {
 function setOnlineStatus(isOnline) {
   const user = auth.currentUser;
   if(!user) return;
-  const userRef = firebase.database.ref(rtdb, 'online/' + user.uid);
+  const userRef = firebase.database().ref(rtdb, 'online/' + user.uid);
   if(isOnline) {
-    firebase.database.set(userRef, user.email);
-    firebase.database.onDisconnect(userRef).remove();
+    userRef.set(user.email);
+    userRef.onDisconnect().remove();
   } else {
-    firebase.database.remove(userRef);
+    userRef.remove();
   }
 }
 
 // ---------- Track Auth State ----------
-firebase.auth.onAuthStateChanged(auth, user => {
+firebase.auth().onAuthStateChanged(auth, user => {
   if(user) {
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('app-section').style.display = 'block';
