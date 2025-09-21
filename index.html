@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachers Quorum Site</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getDatabase } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+
+    // Firebase config (replace with your project values)
+    const firebaseConfig = {
+      apiKey: "AIzaSyADoWYQ_aURppoItPBJlIq4l3DgWJxh0hk",
+      authDomain: "teachers-quorum-site-backend.firebaseapp.com",
+      projectId: "teachers-quorum-site-backend",
+      storageBucket: "teachers-quorum-site-backend.firebasestorage.app",
+      messagingSenderId: "952996757126",
+      appId: "1:952996757126:web:ec85adfd0df7feb93a1b07",
+      databaseURL: "https://teachers-quorum-site-backend-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const rtdb = getDatabase(app);
+
+    // Expose globally for app.js
+    window.firebaseApp = app;
+    window.auth = auth;
+    window.db = db;
+    window.rtdb = rtdb;
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Teachers Quorum Site</h1>
+  </header>
+
+  <main>
+    <!-- Login Section -->
+    <section id="login-section">
+      <h2>Login / Sign Up</h2>
+      <input type="text" id="name" placeholder="Full Name">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="signup()">Sign Up</button>
+      <button onclick="login()">Login</button>
+    </section>
+
+    <!-- Main App Section -->
+    <section id="app-section" style="display:none;">
+      <div class="tab-container">
+        <button onclick="showTab('schedule')">Schedule</button>
+        <button onclick="showTab('chat')">Chat</button>
+        <button onclick="showTab('info')">Info</button>
+        <button onclick="logout()">Logout</button>
+      </div>
+
+      <!-- Schedule Tab -->
+      <div id="schedule" class="tab-content">
+        <h2>Activity Schedule</h2>
+        <table id="schedule-table"></table>
+      </div>
+
+      <!-- Chat Tab -->
+      <div id="chat" class="tab-content">
+        <h2>Chat</h2>
+        <div id="chat-box"></div>
+        <input type="text" id="chat-input" placeholder="Type a message">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+
+      <!-- Info Tab -->
+      <div id="info" class="tab-content">
+        <h2>User Info</h2>
+        <p id="user-info"></p>
+        <h3>Online Users</h3>
+        <ul id="online-users"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p style="text-align:center; font-size:0.8em;">Made by Sterling Beck</p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
