@@ -1,151 +1,76 @@
-// Use global Firebase objects
-const auth = window.auth;
-const db = window.db;
-const rtdb = window.rtdb;
+// ✅ Initialize Firebase App
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY", 
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com", 
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com"
+};
 
-// ---------- Signup ----------
-window.signup = async function() {
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+// Make sure Firebase SDK is loaded via <script> in index.html
+firebase.initializeApp(firebaseConfig);
 
-  if (!name || !email || !password) return alert("Fill all fields");
+// ✅ Services
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  try {
-    const userCred = await firebase.auth().createUserWithEmailAndPassword(auth, email, password);
-    await firebase.firestore().doc(db, 'users', userCred.user.uid).set({ name, email });
-    alert("Account created! You can now log in.");
-    document.getElementById('name').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('password').value = '';
-  } catch (err) {
-    alert(err.message);
-  }
-}
+// ✅ Sign Up
+function signup() {
+  const name = document.getElementById("signup-name").value;
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
 
-// ---------- Login ----------
-window.login = async function() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-
-  if (!email || !password) return alert("Enter email and password");
-
-  try {
-    await firebase.auth().signInWithEmailAndPassword(auth, email, password);
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('app-section').style.display = 'block';
-    loadSchedule();
-    loadChat();
-    loadUserInfo();
-    setOnlineStatus(true);
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-// ---------- Logout ----------
-window.logout = function() {
-  setOnlineStatus(false);
-  firebase.auth().signOut(auth);
-  document.getElementById('app-section').style.display = 'none';
-  document.getElementById('login-section').style.display = 'block';
-}
-
-// ---------- Tab Switching ----------
-window.showTab = function(tabId) {
-  document.querySelectorAll('.tab-content').forEach(tab => tab.style.display='none');
-  document.getElementById(tabId).style.display='block';
-}
-
-// ---------- Load Schedule ----------
-async function loadSchedule() {
-  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVXc593WLsr5rbR6FTA8Gn8P5gAxSgdqizcq3EOCv2YPhai7MnCtMw8HWyl7i_PAYMRaHvgbKtGAf4/pub?output=csv';
-  try {
-    const res = await fetch(url);
-    const csv = await res.text();
-    const rows = csv.split('\n').map(r => r.split(','));
-    const table = document.getElementById('schedule-table');
-    table.innerHTML = '';
-    rows.forEach(row => {
-      const tr = document.createElement('tr');
-      row.forEach(cell => {
-        const td = document.createElement('td');
-        td.textContent = cell;
-        tr.appendChild(td);
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((cred) => {
+      // Save user profile in Firestore
+      return db.collection("users").doc(cred.user.uid).set({
+        name: name,
+        email: email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      table.appendChild(tr);
+    })
+    .then(() => {
+      alert("✅ Account created successfully!");
+      document.getElementById("signup-name").value = "";
+      document.getElementById("signup-email").value = "";
+      document.getElementById("signup-password").value = "";
+    })
+    .catch((error) => {
+      alert("❌ Error: " + error.message);
     });
-  } catch(err) {
-    console.error("Error loading schedule:", err);
-  }
 }
 
-// ---------- Chat ----------
-function loadChat() {
-  const chatBox = document.getElementById('chat-box');
-  firebase.database().ref(rtdb, 'chat').on('value', snapshot => {
-    chatBox.innerHTML = '';
-    const messages = snapshot.val() || {};
-    Object.values(messages).forEach(msg => {
-      const p = document.createElement('p');
-      p.textContent = `${msg.user}: ${msg.text}`;
-      chatBox.appendChild(p);
+// ✅ Login
+function login() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("✅ Logged in successfully!");
+      document.getElementById("login-email").value = "";
+      document.getElementById("login-password").value = "";
+    })
+    .catch((error) => {
+      alert("❌ Error: " + error.message);
     });
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
 }
 
-window.sendMessage = function() {
-  const input = document.getElementById('chat-input');
-  if(!input.value || !auth.currentUser) return;
-  firebase.database().ref(rtdb, 'chat').push({ user: auth.currentUser.email, text: input.value });
-  input.value = '';
-}
-
-// ---------- User Info & Online ----------
-async function loadUserInfo() {
-  const user = auth.currentUser;
-  const docSnap = await firebase.firestore().doc(db, 'users', user.uid).get();
-  if(docSnap.exists) {
-    document.getElementById('user-info').textContent = `Name: ${docSnap.data().name}, Email: ${docSnap.data().email}`;
-  }
-
-  const onlineUsersEl = document.getElementById('online-users');
-  firebase.database().ref(rtdb, 'online').on('value', snapshot => {
-    onlineUsersEl.innerHTML = '';
-    const users = snapshot.val() || {};
-    Object.values(users).forEach(u => {
-      const li = document.createElement('li');
-      li.textContent = u;
-      onlineUsersEl.appendChild(li);
+// ✅ Logout
+function logout() {
+  auth.signOut()
+    .then(() => {
+      alert("👋 Logged out.");
     });
-  });
 }
 
-// ---------- Online Status ----------
-function setOnlineStatus(isOnline) {
-  const user = auth.currentUser;
-  if(!user) return;
-  const userRef = firebase.database().ref(rtdb, 'online/' + user.uid);
-  if(isOnline) {
-    userRef.set(user.email);
-    userRef.onDisconnect().remove();
+// ✅ Auth state listener (shows login/logout status in console)
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log("✅ User logged in:", user.email);
   } else {
-    userRef.remove();
-  }
-}
-
-// ---------- Track Auth State ----------
-firebase.auth().onAuthStateChanged(auth, user => {
-  if(user) {
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('app-section').style.display = 'block';
-    loadSchedule();
-    loadChat();
-    loadUserInfo();
-    setOnlineStatus(true);
-  } else {
-    document.getElementById('login-section').style.display = 'block';
-    document.getElementById('app-section').style.display = 'none';
+    console.log("❌ No user logged in");
   }
 });
