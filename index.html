@@ -9,59 +9,33 @@
 <body>
   <h1>Teachers Quorum Site</h1>
 
-  <!-- LOGIN / SIGNUP -->
-  <div id="login-section">
+  <!-- Signup -->
+  <div>
     <h2>Sign Up</h2>
-    <input type="text" id="name" placeholder="Name">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="signup()">Sign Up</button>
+    <input type="text" id="signup-name" placeholder="Name">
+    <input type="email" id="signup-email" placeholder="Email">
+    <input type="password" id="signup-password" placeholder="Password">
+    <button id="signup-btn">Sign Up</button>
+  </div>
 
+  <!-- Login -->
+  <div>
     <h2>Login</h2>
     <input type="email" id="login-email" placeholder="Email">
     <input type="password" id="login-password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <button id="login-btn">Login</button>
   </div>
 
-  <!-- APP SECTION -->
-  <div id="app-section" style="display:none;">
-    <button onclick="logout()">Logout</button>
+  <p style="font-size: 12px; margin-top: 40px;">Made by: Sterling Beck</p>
 
-    <nav>
-      <button onclick="showTab('schedule-tab')">Schedule</button>
-      <button onclick="showTab('chat-tab')">Chat</button>
-      <button onclick="showTab('info-tab')">Info</button>
-    </nav>
-
-    <div id="schedule-tab" class="tab-content">
-      <h2>Lesson & Bread Schedule</h2>
-      <table id="schedule-table"></table>
-    </div>
-
-    <div id="chat-tab" class="tab-content" style="display:none;">
-      <h2>Chat</h2>
-      <div id="chat-box" style="border:1px solid #000; height:200px; overflow:auto;"></div>
-      <input type="text" id="chat-input" placeholder="Type message">
-      <button onclick="sendMessage()">Send</button>
-    </div>
-
-    <div id="info-tab" class="tab-content" style="display:none;">
-      <h2>User Info</h2>
-      <p id="user-info"></p>
-      <h3>Online Users</h3>
-      <ul id="online-users"></ul>
-    </div>
-  </div>
-
-  <footer style="font-size: small; margin-top: 20px;">Made by: Sterling Beck</footer>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js"></script>
+  <!-- ✅ Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
   <script>
+    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyADoWYQ_aURppoItPBJlIq4l3DgWJxh0hk",
       authDomain: "teachers-quorum-site-backend.firebaseapp.com",
@@ -71,17 +45,16 @@
       appId: "1:952996757126:web:ec85adfd0df7feb93a1b07"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const rtdb = firebase.database();
+    // Initialize Firebase (compat version)
+    firebase.initializeApp(firebaseConfig);
 
-    // expose globally for app.js
-    window.auth = auth;
-    window.db = db;
-    window.rtdb = rtdb;
+    // Expose Firebase services globally for app.js
+    window.auth = firebase.auth();
+    window.db = firebase.firestore();
+    window.rtdb = firebase.database();
   </script>
 
-  <script src="app.js"></script>
+  <!-- Your app logic -->
+  <script src="app.js" defer></script>
 </body>
 </html>
