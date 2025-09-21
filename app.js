@@ -1,76 +1,79 @@
-// -------------------------
-// 1. Initialize Firebase
-// -------------------------
+// ----- Firebase Configuration -----
 const firebaseConfig = {
   apiKey: "AIzaSyADoWYQ_aURppoItPBJlIq4l3DgWJxh0hk",
   authDomain: "teachers-quorum-site-backend.firebaseapp.com",
   projectId: "teachers-quorum-site-backend",
-  storageBucket: "teachers-quorum-site-backend.firebasestorage.app",
+  storageBucket: "teachers-quorum-site-backend.appspot.com",
   messagingSenderId: "952996757126",
   appId: "1:952996757126:web:YOUR_APP_ID"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// -------------------------
-// 2. DOM Elements
-// -------------------------
-const signupForm = document.getElementById("signup-form");
-const loginForm = document.getElementById("login-form");
-const messageDiv = document.getElementById("message");
+// ----- DOM Elements -----
+const signupForm = document.getElementById('signup-form');
+const loginForm = document.getElementById('login-form');
+const logoutBtn = document.getElementById('logout-btn');
+const authSection = document.getElementById('auth-section');
+const userSection = document.getElementById('user-section');
+const welcomeMsg = document.getElementById('welcome-msg');
 
-// -------------------------
-// 3. Helper Function
-// -------------------------
-function showMessage(msg, isError = true) {
-  messageDiv.textContent = msg;
-  messageDiv.style.color = isError ? 'red' : 'green';
-}
-
-// -------------------------
-// 4. Sign Up Handler
-// -------------------------
-signupForm.addEventListener("submit", async (e) => {
+// ----- Sign Up -----
+signupForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const name = document.getElementById("signup-name").value.trim();
-  const email = document.getElementById("signup-email").value.trim();
-  const password = document.getElementById("signup-password").value;
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
 
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    await userCredential.user.updateProfile({ displayName: name });
-    showMessage(`Sign Up Successful! Welcome, ${name}`, false);
+    console.log("Signup successful:", userCredential.user);
+    alert("Sign up successful!");
     signupForm.reset();
   } catch (error) {
-    showMessage(error.message);
+    console.error("Signup error:", error);
+    alert(`Sign up failed: ${error.message}`);
   }
 });
 
-// -------------------------
-// 5. Login Handler
-// -------------------------
-loginForm.addEventListener("submit", async (e) => {
+// ----- Login -----
+loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value;
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
 
   try {
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    showMessage(`Login Successful! Welcome back, ${userCredential.user.displayName || 'User'}`, false);
+    console.log("Login successful:", userCredential.user);
     loginForm.reset();
   } catch (error) {
-    showMessage(error.message);
+    console.error("Login error:", error);
+    alert(`Login failed: ${error.message}`);
   }
 });
 
-// -------------------------
-// 6. Auth State Listener
-// -------------------------
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log("User logged in:", user.email, "Display Name:", user.displayName);
-  } else {
-    console.log("No user logged in");
+// ----- Logout -----
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await auth.signOut();
+    console.log("User logged out");
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert(`Logout failed: ${error.message}`);
   }
 });
+
+// ----- Auth State Listener -----
+auth.onAuthStateChanged(user => {
+  if (user) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    welcomeMsg.textContent = `Welcome, ${user.email}`;
+  } else {
+    authSection.style.display = 'block';
+    userSection.style.display = 'none';
+    welcomeMsg.textContent = '';
+  }
+});
+
