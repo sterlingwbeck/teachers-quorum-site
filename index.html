@@ -1,46 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teachers Quorum</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teachers Quorum Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Teachers Quorum Login</h1>
+  <div class="container">
+    <h1>Teachers Quorum</h1>
+    <div id="message" class="message"></div>
 
-  <!-- Error display -->
-  <div id="error-message"></div>
+    <div id="auth-forms">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
 
-  <div id="auth-forms">
-    <!-- Sign Up -->
-    <form id="signup-form">
-      <h2>Sign Up</h2>
-      <input type="email" id="signup-email" placeholder="Email" required />
-      <input type="password" id="signup-password" placeholder="Password" required />
-      <button type="submit">Create Account</button>
-    </form>
-
-    <!-- Login -->
-    <form id="login-form">
-      <h2>Login</h2>
-      <input type="email" id="login-email" placeholder="Email" required />
-      <input type="password" id="login-password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+      <button id="signupBtn">Create Account</button>
+      <button id="loginBtn">Login</button>
+    </div>
   </div>
 
-  <!-- Success page -->
-  <div id="success-page" style="display: none;">
-    <h2>🎉 SUCCESS! 🎉</h2>
-    <p>Welcome to Teachers Quorum. You are now logged in.</p>
-    <button id="logout-btn">Log Out</button>
-  </div>
-
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
