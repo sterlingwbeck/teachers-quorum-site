@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teachers Quorum</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="favicon.png">
-  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <h1>Teachers Quorum</h1>
-  <p>Sign up or log in to access quorum tools.</p>
+  <h1>Teachers Quorum Login</h1>
+
+  <!-- Error display -->
+  <div id="error-message"></div>
 
   <div id="auth-forms">
+    <!-- Sign Up -->
     <form id="signup-form">
-      <h2>Create account</h2>
-      <input type="email" id="signup-email" placeholder="Email" required>
-      <input type="password" id="signup-password" placeholder="Password" required>
-      <button type="submit">Sign Up</button>
+      <h2>Sign Up</h2>
+      <input type="email" id="signup-email" placeholder="Email" required />
+      <input type="password" id="signup-password" placeholder="Password" required />
+      <button type="submit">Create Account</button>
     </form>
 
+    <!-- Login -->
     <form id="login-form">
-      <h2>Welcome back</h2>
-      <input type="email" id="login-email" placeholder="Email" required>
-      <input type="password" id="login-password" placeholder="Password" required>
-      <button type="submit">Log in</button>
+      <h2>Login</h2>
+      <input type="email" id="login-email" placeholder="Email" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <button type="submit">Login</button>
     </form>
   </div>
 
-  <div id="error-message"></div>
-
-  <div id="dashboard" style="display:none;">
-    <h2 id="welcome-msg">Welcome</h2>
-    <button id="logout-btn">Sign out</button>
-    <p id="uid-display"></p>
+  <!-- Success page -->
+  <div id="success-page" style="display: none;">
+    <h2>🎉 SUCCESS! 🎉</h2>
+    <p>Welcome to Teachers Quorum. You are now logged in.</p>
+    <button id="logout-btn">Log Out</button>
   </div>
 
   <script src="app.js"></script>
