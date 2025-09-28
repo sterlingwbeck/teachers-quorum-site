@@ -4,22 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Teachers Quorum Login</title>
-<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.png">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .container {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 320px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .message {
+    margin-bottom: 10px;
+    min-height: 20px;
+    font-weight: bold;
+  }
+
+  .celebration {
+    font-size: 1.5em;
+    color: #155724;
+    background: #d4edda;
+    padding: 20px;
+    border-radius: 12px;
+    display: none;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="auth-container">
     <h1>Teachers Quorum</h1>
     <div id="message" class="message"></div>
-
-    <div id="auth-forms">
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Password" required>
-
-      <button id="signupBtn">Create Account</button>
-      <button id="loginBtn">Login</button>
-    </div>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="signupBtn">Create Account</button>
+    <button id="loginBtn">Login</button>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <div class="container celebration" id="celebration">
+    🎉 Success! You are logged in! 🎉
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-auth.js";
+
+  // Replace with your actual Firebase Web app credentials
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY_HERE",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const signupBtn = document.getElementById('signupBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const messageDiv = document.getElementById('message');
+  const authContainer = document.getElementById('auth-container');
+  const celebrationDiv = document.getElementById('celebration');
+
+  function showMessage(msg, color='red') {
+    messageDiv.style.color = color;
+    messageDiv.textContent = msg;
+  }
+
+  function showCelebration() {
+    authContainer.style.display = 'none';
+    celebrationDiv.style.display = 'block';
+  }
+
+  signupBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      showMessage('Email and password are required!');
+      return;
+    }
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      showMessage('Account created! Logging in...', 'green');
+      setTimeout(showCelebration, 800);
+    } catch (error) {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          showMessage('This email is already registered.');
+          break;
+        case 'auth/invalid-email':
+          showMessage('Invalid email address.');
+          break;
+        case 'auth/weak-password':
+          showMessage('Password must be at least 6 characters.');
+          break;
+        default:
+          showMessage('Signup error: ' + error.message);
+      }
+    }
+  });
+
+  loginBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      showMessage('Email and password are required!');
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showMessage('Login successful!', 'green');
+      setTimeout(showCelebration, 500);
+    } catch (error) {
+      switch (error.code) {
+        case 'auth/user-not-found':
+          showMessage('No account found with this email.');
+          break;
+        case 'auth/wrong-password':
+          showMessage('Incorrect password.');
+          break;
+        case 'auth/invalid-email':
+          showMessage('Invalid email address.');
+          break;
+        default:
+          showMessage('Login error: ' + error.message);
+      }
+    }
+  });
+</script>
 </body>
 </html>
