@@ -6,85 +6,81 @@
 <title>Teachers Quorum Login</title>
 <link rel="icon" href="favicon.png">
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-
-  .container {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    text-align: center;
-    width: 320px;
-  }
-
-  input {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-
-  button {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 6px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  button:hover {
-    background-color: #0056b3;
-  }
-
-  .message {
-    margin-bottom: 10px;
-    min-height: 20px;
-    font-weight: bold;
-  }
-
-  .celebration {
-    font-size: 1.5em;
-    color: #155724;
-    background: #d4edda;
-    padding: 20px;
-    border-radius: 12px;
-    display: none;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 320px;
+}
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+.message {
+  margin-bottom: 10px;
+  min-height: 20px;
+  font-weight: bold;
+}
+.celebration {
+  font-size: 1.5em;
+  color: #155724;
+  background: #d4edda;
+  padding: 20px;
+  border-radius: 12px;
+  display: none;
+}
 </style>
 </head>
 <body>
-  <div class="container" id="auth-container">
-    <h1>Teachers Quorum</h1>
-    <div id="message" class="message"></div>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button id="signupBtn">Create Account</button>
-    <button id="loginBtn">Login</button>
-  </div>
 
-  <div class="container celebration" id="celebration">
-    🎉 Success! You are logged in! 🎉
-  </div>
+<div class="container" id="auth-container">
+  <h1>Teachers Quorum</h1>
+  <div id="message" class="message"></div>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button id="signupBtn">Create Account</button>
+  <button id="loginBtn">Login</button>
+</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-auth.js";
+<div class="container celebration" id="celebration">
+  🎉 Success! You are logged in! 🎉
+</div>
 
-  // Replace with your actual Firebase Web app credentials
-  const firebaseConfig = {
+<!-- Firebase v8 (works over file://) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+  // Your Firebase config (replace with actual values)
+  var firebaseConfig = {
     apiKey: "YOUR_API_KEY_HERE",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
     projectId: "YOUR_PROJECT_ID",
@@ -93,8 +89,9 @@
     appId: "YOUR_APP_ID"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
 
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
@@ -114,7 +111,7 @@
     celebrationDiv.style.display = 'block';
   }
 
-  signupBtn.addEventListener('click', async () => {
+  signupBtn.addEventListener('click', function() {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
@@ -123,28 +120,29 @@
       return;
     }
 
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      showMessage('Account created! Logging in...', 'green');
-      setTimeout(showCelebration, 800);
-    } catch (error) {
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          showMessage('This email is already registered.');
-          break;
-        case 'auth/invalid-email':
-          showMessage('Invalid email address.');
-          break;
-        case 'auth/weak-password':
-          showMessage('Password must be at least 6 characters.');
-          break;
-        default:
-          showMessage('Signup error: ' + error.message);
-      }
-    }
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(function() {
+        showMessage('Account created! Logging in...', 'green');
+        setTimeout(showCelebration, 800);
+      })
+      .catch(function(error) {
+        switch(error.code) {
+          case 'auth/email-already-in-use':
+            showMessage('This email is already registered.');
+            break;
+          case 'auth/invalid-email':
+            showMessage('Invalid email address.');
+            break;
+          case 'auth/weak-password':
+            showMessage('Password must be at least 6 characters.');
+            break;
+          default:
+            showMessage('Signup error: ' + error.message);
+        }
+      });
   });
 
-  loginBtn.addEventListener('click', async () => {
+  loginBtn.addEventListener('click', function() {
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
 
@@ -153,26 +151,28 @@
       return;
     }
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      showMessage('Login successful!', 'green');
-      setTimeout(showCelebration, 500);
-    } catch (error) {
-      switch (error.code) {
-        case 'auth/user-not-found':
-          showMessage('No account found with this email.');
-          break;
-        case 'auth/wrong-password':
-          showMessage('Incorrect password.');
-          break;
-        case 'auth/invalid-email':
-          showMessage('Invalid email address.');
-          break;
-        default:
-          showMessage('Login error: ' + error.message);
-      }
-    }
+    auth.signInWithEmailAndPassword(email, password)
+      .then(function() {
+        showMessage('Login successful!', 'green');
+        setTimeout(showCelebration, 500);
+      })
+      .catch(function(error) {
+        switch(error.code) {
+          case 'auth/user-not-found':
+            showMessage('No account found with this email.');
+            break;
+          case 'auth/wrong-password':
+            showMessage('Incorrect password.');
+            break;
+          case 'auth/invalid-email':
+            showMessage('Invalid email address.');
+            break;
+          default:
+            showMessage('Login error: ' + error.message);
+        }
+      });
   });
 </script>
+
 </body>
 </html>
